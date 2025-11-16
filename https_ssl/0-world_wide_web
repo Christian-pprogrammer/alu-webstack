@@ -6,7 +6,7 @@ domain=$1
 if [ "$#" -eq 2 ]; then
    sub=$2
 else
-	sub=("www" "6939-lb-01" "6939-web-01" "6939-web-02")
+	sub=("www" "lb-01" "web-01" "web-02")
 fi
 for subdomain in "${sub[@]}"; do
     echo -n "The subdomain $subdomain"
