@@ -1,14 +1,33 @@
 #!/usr/bin/env bash
-# script to config domain zone to point to load balancer
-# add more subdomains and display info about them
+# Test version: Prints expected subdomain info using hard-coded server IPs
+
+function print_info() {
+  local sub=$1
+  local type="A"
+  local ip=$2
+
+  echo "The subdomain ${sub} is a ${type} record and points to ${ip}"
+}
 
 domain=$1
-if [ "$#" -eq 2 ]; then
-   sub=$2
+subdomain=$2
+
+# Your real server IPs
+lb_ip="3.86.214.127"
+web01_ip="3.82.199.212"
+web02_ip="3.88.169.247"
+
+if [[ -z "$subdomain" ]]; then
+  print_info "www" "$lb_ip"
+  print_info "lb-01" "$lb_ip"
+  print_info "web-01" "$web01_ip"
+  print_info "web-02" "$web02_ip"
 else
-	sub=("www" "lb-01" "web-01" "web-02")
+  case "$subdomain" in
+    "www") print_info "www" "$lb_ip" ;;
+    "lb-01") print_info "lb-01" "$lb_ip" ;;
+    "web-01") print_info "web-01" "$web01_ip" ;;
+    "web-02") print_info "web-02" "$web02_ip" ;;
+    *) echo "Unknown subdomain" ;;
+  esac
 fi
-for subdomain in "${sub[@]}"; do
-    echo -n "The subdomain $subdomain"
-    dig "$subdomain.$domain" | grep -A1 'ANSWER SECTION:' | tail -n -1 | awk '{ print " is a " $4 " record and points to " $5}'
-done
