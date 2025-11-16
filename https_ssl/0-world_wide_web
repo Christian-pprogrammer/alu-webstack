@@ -1,25 +1,14 @@
 #!/usr/bin/env bash
-# Prints only the destination IP of a subdomain
-
-function get_ip {
-  local domain=$1
-  local sub=$2
-  local full="${sub}.${domain}"
-
-  # Resolve the final IP even if CNAME exists
-  local ip
-  ip=$(dig +short "$full" | tail -n1)
-
-  echo "$ip"
-}
+# script to config domain zone to point to load balancer
+# add more subdomains and display info about them
 
 domain=$1
-sub=$2
-
-if [[ -z "$sub" ]]; then
-  for s in www lb-01 web-01 web-02; do
-    get_ip "$domain" "$s"
-  done
+if [ "$#" -eq 2 ]; then
+   sub=$2
 else
-  get_ip "$domain" "$sub"
+	sub=("www" "lb-01" "web-01" "web-02")
 fi
+for subdomain in "${sub[@]}"; do
+    echo -n "The subdomain $subdomain"
+    dig "$subdomain.$domain" | grep -A1 'ANSWER SECTION:' | tail -n -1 | awk '{ print " is a " $4 " record and points to " $5}'
+done
