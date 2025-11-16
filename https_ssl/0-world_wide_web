@@ -1,31 +1,25 @@
 #!/usr/bin/env bash
-# A Bash script that prints information about subdomains with a unique structure.
+# Prints only the destination IP of a subdomain
 
-get_sub_info() {
+function get_ip {
   local domain=$1
-  local subdomain=$2
-  local full="${subdomain}.${domain}"
+  local sub=$2
+  local full="${sub}.${domain}"
 
-  # Get only the last record (resolves even when CNAME exists)
-  local line
-  line=$(dig +noall +answer "$full" | tail -n1)
+  # Resolve the final IP even if CNAME exists
+  local ip
+  ip=$(dig +short "$full" | tail -n1)
 
-  local type
-  type=$(echo "$line" | awk '{print $4}')
-
-  local dest
-  dest=$(echo "$line" | awk '{print $5}')
-
-  echo "The subdomain ${subdomain} is a ${type} record and points to ${dest}"
+  echo "$ip"
 }
 
 domain=$1
-subdomain=$2
+sub=$2
 
-if [[ -z "$subdomain" ]]; then
+if [[ -z "$sub" ]]; then
   for s in www lb-01 web-01 web-02; do
-    get_sub_info "$domain" "$s"
+    get_ip "$domain" "$s"
   done
 else
-  get_sub_info "$domain" "$subdomain"
+  get_ip "$domain" "$sub"
 fi
