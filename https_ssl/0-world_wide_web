@@ -1,14 +1,31 @@
 #!/usr/bin/env bash
-# Test version: Prints expected subdomain info using hard-coded server IPs
+# DNS checker for subdomains
 
-function print_info() {
+function check_record() {
   local sub=$1
-  local type="A"
-  local ip=$2
+  local expected_ip=$2
 
-  echo "The subdomain ${sub} is a ${type} record and points to ${ip}"
+  # Query DNS
+  got_ip=$(dig +short "${sub}.${domain}")
+
+  echo "Your subdomain ${sub} points to your lb-01 server IP"
+
+  echo "[Got]"
+  if [[ -z "$got_ip" ]]; then
+    echo "(0 chars long)"
+  else
+    echo "$got_ip"
+    echo "(${#got_ip} chars long)"
+  fi
+
+  echo ""
+  echo "[Expected]"
+  echo "$expected_ip"
+  echo "(${#expected_ip} chars long)"
+  echo ""
 }
 
+# Inputs
 domain=$1
 subdomain=$2
 
@@ -18,16 +35,16 @@ web01_ip="3.82.199.212"
 web02_ip="3.88.169.247"
 
 if [[ -z "$subdomain" ]]; then
-  print_info "www" "$lb_ip"
-  print_info "lb-01" "$lb_ip"
-  print_info "web-01" "$web01_ip"
-  print_info "web-02" "$web02_ip"
+  check_record "www" "$lb_ip"
+  check_record "lb-01" "$lb_ip"
+  check_record "web-01" "$web01_ip"
+  check_record "web-02" "$web02_ip"
 else
   case "$subdomain" in
-    "www") print_info "www" "$lb_ip" ;;
-    "lb-01") print_info "lb-01" "$lb_ip" ;;
-    "web-01") print_info "web-01" "$web01_ip" ;;
-    "web-02") print_info "web-02" "$web02_ip" ;;
+    "www") check_record "www" "$lb_ip" ;;
+    "lb-01") check_record "lb-01" "$lb_ip" ;;
+    "web-01") check_record "web-01" "$web01_ip" ;;
+    "web-02") check_record "web-02" "$web02_ip" ;;
     *) echo "Unknown subdomain" ;;
   esac
 fi
